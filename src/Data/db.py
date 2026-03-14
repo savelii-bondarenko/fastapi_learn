@@ -1,8 +1,6 @@
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker, Session
 from sqlalchemy.ext.declarative import declarative_base
-from typing import Annotated
-from fastapi import Depends
 
 engine = create_engine('sqlite:///Data/DB.sqlite')
 session = sessionmaker(bind=engine,
@@ -11,28 +9,33 @@ session = sessionmaker(bind=engine,
 
 Base = declarative_base()
 
-def get_db():
+def db_delete(data):
     db = session()
-    try:
-        yield db
-    finally:
-        db.close()
-
-db_dependency = Annotated[Session, Depends(get_db)] #for routers
-
-def db_delete(data, db: Session):
     db.delete(data)
     db.commit()
+    db.close()
 
-def db_add(data, db: Session):
+def db_add(data):
+    db = session()
     db.add(data)
     db.commit()
+    db.close()
 
-def get_all(table, db: Session):
-     return db.query(table).all()
 
-def find_by_id(table, get_id, db: Session):
-     return db.query(table).filter(table.id==get_id).first()
+def get_all(table):
+    db = session()
+    data = db.query(table).all()
+    db.close()
+    return data
 
-def db_update(db: Session):
+
+def find_by_id(table, get_id):
+    db = session()
+    data = db.query(table).filter(table.id==get_id).first()
+    db.close()
+    return data
+
+def db_update():
+    db = session()
     db.commit()
+    db.close()

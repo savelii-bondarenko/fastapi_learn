@@ -2,7 +2,7 @@ from fastapi import APIRouter, status
 from pydantic import BaseModel
 from Data.models import Users
 from passlib.context import CryptContext
-from Data.db import db_dependency, db_add
+from Data.db import db_add
 
 router = APIRouter(
     tags=["Auth controllers"]
@@ -19,7 +19,7 @@ class CreateUserRequest(BaseModel):
     role: str
 
 @router.post("/auth", status_code=status.HTTP_201_CREATED)
-async def create_user(user_request: CreateUserRequest, db: db_dependency):
+async def create_user(user_request: CreateUserRequest):
     user_request = Users(
         username=user_request.username,
         email=user_request.email,
@@ -28,7 +28,7 @@ async def create_user(user_request: CreateUserRequest, db: db_dependency):
         hashed_password=PWD_CONTEXT.hash(user_request.password),
         role=user_request.role
     )
-    db_add(user_request, db)
+    db_add(user_request)
     return {"message": "User created successfully"}
     
 
